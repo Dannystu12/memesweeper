@@ -41,6 +41,14 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	if (wnd.mouse.LeftIsPressed())
+	{
+		const Vei2 mousePos = wnd.mouse.GetPos();
+		if (minefield.GetRect().Contains(mousePos))
+		{
+			minefield.OnRevealClick(mousePos);
+		}
+	}
 }
 
 void Game::ComposeFrame()

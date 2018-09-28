@@ -39,6 +39,17 @@ void MineField::Tile::Draw(const Vei2& pos, Graphics& gfx) const
 	}
 }
 
+void MineField::Tile::Reveal()
+{
+	assert(state == State::Hidden);
+	state = State::Revealed;
+}
+
+bool MineField::Tile::IsRevealed() const
+{
+	return state == State::Revealed;
+}
+
 MineField::MineField(int nMines)
 {
 	assert(nMines > 0);
@@ -77,6 +88,19 @@ RectI MineField::GetRect() const
 	return RectI(0, SpriteCodex::tileSize * width, 0, SpriteCodex::tileSize * height);
 }
 
+void MineField::OnRevealClick(const Vei2& screenPos)
+{
+	const Vei2 gridPos = GetGridPos(screenPos);
+	assert(gridPos.x >= 0 && gridPos.x < width);
+	assert(gridPos.y >= 0 && gridPos.y < height);
+	Tile& tile = TileAt(gridPos);
+
+	if (!tile.IsRevealed())
+	{
+		tile.Reveal();
+	}
+}
+
 MineField::Tile& MineField::TileAt(const Vei2 & gridPos)
 {
 	return field[gridPos.y * width + gridPos.x];
@@ -85,4 +109,9 @@ MineField::Tile& MineField::TileAt(const Vei2 & gridPos)
 const MineField::Tile& MineField::TileAt(const Vei2 & gridPos) const
 {
 	return field[gridPos.y * width + gridPos.x];
+}
+
+Vei2 MineField::GetGridPos(const Vei2 & screenPos) const
+{
+	return screenPos / SpriteCodex::tileSize;;
 }

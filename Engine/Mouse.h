@@ -71,9 +71,9 @@ public:
 		{
 			return type;
 		}
-		Vei2 GetPos() const
+		Vei2 GetPos()
 		{
-			return{ x,y };
+			return { x, y };
 		}
 		int GetPosX() const
 		{
