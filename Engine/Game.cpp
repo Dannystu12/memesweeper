@@ -41,14 +41,30 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	if (wnd.mouse.LeftIsPressed())
+
+
+	while (!wnd.mouse.IsEmpty())
 	{
-		const Vei2 mousePos = wnd.mouse.GetPos();
-		if (minefield.GetRect().Contains(mousePos))
+		const Mouse::Event e = wnd.mouse.Read();
+		if (e.GetType() == Mouse::Event::Type::LPress)
 		{
-			minefield.OnRevealClick(mousePos);
+			const Vei2 mousePos = e.GetPos();
+			if (minefield.GetRect().Contains(mousePos))
+			{
+				minefield.OnRevealClick(mousePos);
+			}
 		}
+		else if (e.GetType() == Mouse::Event::Type::RPress)
+		{
+			const Vei2 mousePos = e.GetPos();
+			if (minefield.GetRect().Contains(mousePos))
+			{
+				minefield.OnFlagClick(mousePos);
+			}
+		}
+
 	}
+
 }
 
 void Game::ComposeFrame()
