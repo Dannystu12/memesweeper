@@ -23,38 +23,26 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
-#include "MemeField.h"
-#include "SelectionMenu.h"
+#include "MineField.h"
+
 
 class Game
 {
 private:
-	enum class State
-	{
-		SelectionMenu,
-		Memesweeper
-	};
 public:
 	Game( class MainWindow& wnd );
-	Game( const Game& ) = delete;
-	~Game();
-	Game& operator=( const Game& ) = delete;
 	void Go();
 private:
 	void ComposeFrame();
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
-	void CreateField( int width,int height,int nMemes );
-	void DestroyField();
 	/********************************/
 private:
 	MainWindow& wnd;
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
-	MemeField* pField = nullptr;
-	SelectionMenu menu;
-	State state = State::SelectionMenu;
+	MineField minefield;
 	/********************************/
 };
