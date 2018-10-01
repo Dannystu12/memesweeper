@@ -8,6 +8,13 @@
 
 class MineField
 {
+public:
+	enum class GameState
+	{
+		Playing,
+		Win,
+		Lose
+	};
 private:
 	class Tile
 	{
@@ -20,7 +27,7 @@ private:
 		};
 	public:
 		void SpawnMine();
-		void Draw(const Vei2& screenPos, bool gameOver, Graphics& gfx) const;
+		void Draw(const Vei2& screenPos, MineField::GameState gameState, Graphics& gfx) const;
 		void Reveal();
 		bool IsRevealed() const;
 		bool IsHidden() const;
@@ -32,6 +39,7 @@ private:
 		bool hasMine = false;
 		int nNeighbourMines = -1;
 	};
+
 public:
 	MineField(int nMines);
 	void Draw(Graphics& gfx) const;
@@ -51,7 +59,6 @@ private:
 	static constexpr int xPadding = Graphics::ScreenWidth / 2 - width / 2 * SpriteCodex::tileSize;
 	static constexpr int yPadding = Graphics::ScreenHeight / 2 - height / 2 * SpriteCodex::tileSize;
 	static constexpr Color borderColor = Colors::Blue;
-	bool gameOver = false;
-	bool hasWon = false;
+	GameState gameState = GameState::Playing;
 	Tile field[width * height];
 };

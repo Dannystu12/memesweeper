@@ -56,7 +56,6 @@ void Game::UpdateModel()
 				{
 					loseSound.Play();
 				}
-				
 			}
 		}
 		else if (e.GetType() == Mouse::Event::Type::RPress)

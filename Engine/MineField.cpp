@@ -11,9 +11,9 @@ void MineField::Tile::SpawnMine()
 	hasMine = true;
 }
 
-void MineField::Tile::Draw(const Vei2& screenPos, bool gameOver, Graphics& gfx) const
+void MineField::Tile::Draw(const Vei2& screenPos, GameState gameState, Graphics& gfx) const
 {
-	if (!gameOver)
+	if (gameState == GameState::Playing)
 	{
 		switch (state)
 		{
@@ -162,11 +162,11 @@ void MineField::Draw(Graphics & gfx) const
 	{
 		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
 		{
-			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize + padding, gameOver, gfx);
+			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize + padding, gameState, gfx);
 		}
 	}
 
-	if (hasWon)
+	if (gameState == GameState::Win)
 	{
 		SpriteCodex::DrawWin({Graphics::ScreenWidth / 2,
 			Graphics::ScreenHeight / 2 }, 
@@ -181,7 +181,7 @@ RectI MineField::GetRect() const
 
 bool MineField::OnRevealClick(const Vei2& screenPos)
 {
-	if (!gameOver)
+	if (gameState == GameState::Playing)
 	{
 		const Vei2 gridPos = GetGridPos(screenPos);
 		assert(gridPos.x >= 0 && gridPos.x < width);
@@ -193,7 +193,7 @@ bool MineField::OnRevealClick(const Vei2& screenPos)
 			tile.Reveal();
 			if (tile.HasMine())
 			{
-				gameOver = true;
+				gameState = GameState::Lose;
 				return true;
 			}
 			else
@@ -208,7 +208,7 @@ bool MineField::OnRevealClick(const Vei2& screenPos)
 
 void MineField::OnFlagClick(const Vei2 & screenPos)
 {
-	if (gameOver) return;
+	if (gameState != GameState::Playing) return;
 	const Vei2 gridPos = GetGridPos(screenPos);
 	assert(gridPos.x >= 0 && gridPos.x < width);
 	assert(gridPos.y >= 0 && gridPos.y < height);
@@ -269,7 +269,6 @@ void MineField::DrawBorder(Graphics & gfx) const
 
 void MineField::CheckForWin()
 {
-	bool win = true;
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
@@ -277,11 +276,10 @@ void MineField::CheckForWin()
 			const Vei2 gridPos(x, y);
 			if (TileAt(gridPos).IsHidden() && !TileAt(gridPos).HasMine())
 			{
-				win = false;
-				break;
+				return;
+
 			}
 		}
 	}
-	if (win) gameOver = true;
-	hasWon = win;
+	gameState = GameState::Win;
 }
