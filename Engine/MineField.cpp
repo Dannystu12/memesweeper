@@ -94,9 +94,19 @@ bool MineField::Tile::IsHidden() const
 	return state == State::Hidden;
 }
 
+bool MineField::Tile::IsFlagged() const
+{
+	return state == State::Flagged;
+}
+
 bool MineField::Tile::HasMine() const
 {
 	return hasMine;
+}
+
+int MineField::Tile::GetNeighbourMineCount()
+{
+	return nNeighbourMines;
 }
 
 void MineField::Tile::ToggleFlag()
@@ -190,14 +200,20 @@ bool MineField::OnRevealClick(const Vei2& screenPos)
 
 		if (tile.IsHidden())
 		{
-			tile.Reveal();
+			
 			if (tile.HasMine())
 			{
+				tile.Reveal();
 				gameState = GameState::Lose;
 				return true;
 			}
+			else if (tile.GetNeighbourMineCount() == 0)
+			{
+				RevealAdjacentTiles(gridPos);
+			}
 			else
 			{
+				tile.Reveal();
 				CheckForWin();
 			}
 
@@ -282,4 +298,32 @@ void MineField::CheckForWin()
 		}
 	}
 	gameState = GameState::Win;
+}
+
+void MineField::RevealAdjacentTiles(const Vei2& gridPos)
+{
+	const int xStart = std::max(0, gridPos.x - 1);
+	const int xEnd = std::min(width - 1, gridPos.x + 1);
+	const int yStart = std::max(0, gridPos.y - 1);
+	const int yEnd = std::min(height - 1, gridPos.y + 1);
+
+	Tile& tile = TileAt(gridPos);
+
+	if (!tile.IsHidden() || tile.HasMine() || tile.IsFlagged()) return;
+	else
+	{
+		tile.Reveal();
+		if (tile.GetNeighbourMineCount() > 0) return;
+		for (Vei2 pos = { xStart, yStart }; pos.y <= yEnd; pos.y++)
+		{
+			for (pos.x = xStart; pos.x <= xEnd; pos.x++)
+			{
+				RevealAdjacentTiles(pos);
+			}
+		}
+	}
+
+
+
+
 }

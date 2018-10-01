@@ -31,7 +31,9 @@ private:
 		void Reveal();
 		bool IsRevealed() const;
 		bool IsHidden() const;
+		bool IsFlagged() const;
 		bool HasMine() const;
+		int GetNeighbourMineCount();
 		void ToggleFlag();
 		void SetNeighbourMineCount(int mineCount);
 	private:
@@ -53,6 +55,7 @@ private:
 	int CountNeighboursMines(const Vei2& gridPos);
 	void DrawBorder(Graphics& gfx) const;
 	void CheckForWin();
+	void RevealAdjacentTiles(const Vei2& gridPos);
 private:
 	static constexpr int width = 20;
 	static constexpr int height = 16;
