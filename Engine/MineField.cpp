@@ -11,33 +11,71 @@ void MineField::Tile::SpawnMine()
 	hasMine = true;
 }
 
-
-void MineField::Tile::Draw(const Vei2& pos, Graphics& gfx) const
+void MineField::Tile::Draw(const Vei2& screenPos, bool gameOver, Graphics& gfx) const
 {
-	switch (state)
+	if (!gameOver)
 	{
-	case State::Hidden:
-		SpriteCodex::DrawTileButton(pos, gfx);
-		break;
-	case State::Flagged:
-		SpriteCodex::DrawTileButton(pos, gfx);
-		SpriteCodex::DrawTileFlag(pos, gfx);
-		break;
-	case State::Revealed:
-		if (hasMine)
+		switch (state)
 		{
-			SpriteCodex::DrawTileBomb(pos, gfx);
+		case State::Hidden:
+			SpriteCodex::DrawTileButton(screenPos, gfx);
+			break;
+		case State::Flagged:
+			SpriteCodex::DrawTileButton(screenPos, gfx);
+			SpriteCodex::DrawTileFlag(screenPos, gfx);
+			break;
+		case State::Revealed:
+			if (hasMine)
+			{
+
+				SpriteCodex::DrawTileBomb(screenPos, gfx);
+			}
+			else
+			{
+				SpriteCodex::DrawTileNumber(screenPos, nNeighbourMines, gfx);
+			}
+			break;
 		}
-		else if(nNeighbourMines > 0)
-		{
-			SpriteCodex::DrawTileNumber(pos, nNeighbourMines, gfx);
-		}
-		else
-		{
-			SpriteCodex::DrawTile0(pos, gfx);
-		}
-		break;
 	}
+	else
+	{
+		switch (state)
+		{
+		case State::Hidden:
+			if (hasMine)
+			{
+				SpriteCodex::DrawTileBomb(screenPos, gfx);
+			}
+			else
+			{
+				SpriteCodex::DrawTileNumber(screenPos, nNeighbourMines, gfx);
+			}
+			break;
+		case State::Flagged:
+			if (hasMine)
+			{
+				SpriteCodex::DrawTileBomb(screenPos, gfx);
+				SpriteCodex::DrawTileFlag(screenPos, gfx);
+			}
+			else
+			{
+				SpriteCodex::DrawTileNumber(screenPos, nNeighbourMines, gfx);
+				SpriteCodex::DrawTileCross(screenPos, gfx);
+			}
+			break;
+		case State::Revealed:
+			if (hasMine)
+			{
+				SpriteCodex::DrawTileBombRed(screenPos, gfx);
+			}
+			else
+			{
+				SpriteCodex::DrawTileNumber(screenPos, nNeighbourMines, gfx);
+			}
+			break;
+		}
+	}
+
 }
 
 void MineField::Tile::Reveal()
@@ -76,7 +114,8 @@ void MineField::Tile::ToggleFlag()
 
 void MineField::Tile::SetNeighbourMineCount(int mineCount)
 {
-	assert(mineCount >= 0 && mineCount <= 9);
+	assert(nNeighbourMines == -1);
+	assert(mineCount >= 0 && mineCount <= 8);
 	nNeighbourMines = mineCount;
 }
 
@@ -116,36 +155,60 @@ MineField::MineField(int nMines)
 
 void MineField::Draw(Graphics & gfx) const
 {
+	DrawBorder(gfx);
 	gfx.DrawRect(GetRect(), SpriteCodex::baseColor);
+	const Vei2 padding(xPadding, yPadding);
 	for (Vei2 gridPos = { 0,0 }; gridPos.y < height; gridPos.y++)
 	{
 		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
 		{
-			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize, gfx);
+			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize + padding, gameOver, gfx);
 		}
+	}
+
+	if (hasWon)
+	{
+		SpriteCodex::DrawWin({Graphics::ScreenWidth / 2,
+			Graphics::ScreenHeight / 2 }, 
+			gfx);
 	}
 }
 
 RectI MineField::GetRect() const
 {
-	return RectI(0, SpriteCodex::tileSize * width, 0, SpriteCodex::tileSize * height);
+	return RectI(xPadding, xPadding + SpriteCodex::tileSize * width, yPadding, yPadding + SpriteCodex::tileSize * height);
 }
 
-void MineField::OnRevealClick(const Vei2& screenPos)
+bool MineField::OnRevealClick(const Vei2& screenPos)
 {
-	const Vei2 gridPos = GetGridPos(screenPos);
-	assert(gridPos.x >= 0 && gridPos.x < width);
-	assert(gridPos.y >= 0 && gridPos.y < height);
-	Tile& tile = TileAt(gridPos);
-
-	if (tile.IsHidden())
+	if (!gameOver)
 	{
-		tile.Reveal();
+		const Vei2 gridPos = GetGridPos(screenPos);
+		assert(gridPos.x >= 0 && gridPos.x < width);
+		assert(gridPos.y >= 0 && gridPos.y < height);
+		Tile& tile = TileAt(gridPos);
+
+		if (tile.IsHidden())
+		{
+			tile.Reveal();
+			if (tile.HasMine())
+			{
+				gameOver = true;
+				return true;
+			}
+			else
+			{
+				CheckForWin();
+			}
+
+		}
 	}
+	return false;
 }
 
 void MineField::OnFlagClick(const Vei2 & screenPos)
 {
+	if (gameOver) return;
 	const Vei2 gridPos = GetGridPos(screenPos);
 	assert(gridPos.x >= 0 && gridPos.x < width);
 	assert(gridPos.y >= 0 && gridPos.y < height);
@@ -168,7 +231,8 @@ const MineField::Tile& MineField::TileAt(const Vei2 & gridPos) const
 
 Vei2 MineField::GetGridPos(const Vei2 & screenPos) const
 {
-	return screenPos / SpriteCodex::tileSize;;
+	const Vei2 padding(xPadding, yPadding);
+	return (screenPos - padding) / SpriteCodex::tileSize;
 }
 
 int MineField::CountNeighboursMines(const Vei2 & gridPos)
@@ -193,4 +257,31 @@ int MineField::CountNeighboursMines(const Vei2 & gridPos)
 
 
 	return mineCount;
+}
+
+void MineField::DrawBorder(Graphics & gfx) const
+{
+	gfx.DrawRect(xPadding - SpriteCodex::tileSize, 
+		yPadding - SpriteCodex::tileSize, 
+		xPadding + width * SpriteCodex::tileSize + SpriteCodex::tileSize, 
+		yPadding + height * SpriteCodex::tileSize + SpriteCodex::tileSize, borderColor);
+}
+
+void MineField::CheckForWin()
+{
+	bool win = true;
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			const Vei2 gridPos(x, y);
+			if (TileAt(gridPos).IsHidden() && !TileAt(gridPos).HasMine())
+			{
+				win = false;
+				break;
+			}
+		}
+	}
+	if (win) gameOver = true;
+	hasWon = win;
 }

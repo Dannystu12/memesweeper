@@ -2,6 +2,9 @@
 #include "Vei2.h"
 #include "Graphics.h"
 #include "RectI.h"
+#include "SpriteCodex.h"
+#include "Colors.h"
+#include "Sound.h"
 
 class MineField
 {
@@ -17,7 +20,7 @@ private:
 		};
 	public:
 		void SpawnMine();
-		void Draw(const Vei2& pos, Graphics& gfx) const;
+		void Draw(const Vei2& screenPos, bool gameOver, Graphics& gfx) const;
 		void Reveal();
 		bool IsRevealed() const;
 		bool IsHidden() const;
@@ -33,15 +36,22 @@ public:
 	MineField(int nMines);
 	void Draw(Graphics& gfx) const;
 	RectI GetRect() const;
-	void OnRevealClick(const Vei2& screenPos);
+	bool OnRevealClick(const Vei2& screenPos);
 	void OnFlagClick(const Vei2& screenPos);
 private:
 	Tile & TileAt(const Vei2& gridPos);
 	const Tile& TileAt(const Vei2& gridPos) const;
 	Vei2 GetGridPos(const Vei2& screenPos ) const;
 	int CountNeighboursMines(const Vei2& gridPos);
+	void DrawBorder(Graphics& gfx) const;
+	void CheckForWin();
 private:
 	static constexpr int width = 20;
 	static constexpr int height = 16;
+	static constexpr int xPadding = Graphics::ScreenWidth / 2 - width / 2 * SpriteCodex::tileSize;
+	static constexpr int yPadding = Graphics::ScreenHeight / 2 - height / 2 * SpriteCodex::tileSize;
+	static constexpr Color borderColor = Colors::Blue;
+	bool gameOver = false;
+	bool hasWon = false;
 	Tile field[width * height];
 };

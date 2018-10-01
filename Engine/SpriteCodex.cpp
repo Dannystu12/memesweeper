@@ -1475,39 +1475,42 @@ void SpriteCodex::DrawTileBombRed( const Vei2& pos,Graphics& gfx )
 	gfx.PutPixel( 15 + pos.x,15 + pos.y,255,0,0 );
 }
 
-void SpriteCodex::DrawTileNumber( const Vei2& pos,int n,Graphics& gfx )
+void SpriteCodex::DrawTileNumber(const Vei2 & pos, int n, Graphics & gfx)
 {
-	assert( n >= 0 && n <= 8 );
-	switch( n )
+	assert(n >= 0 && n <= 8);
+
+	switch (n)
 	{
 	case 0:
-		DrawTile0( pos,gfx );
+		DrawTile0(pos, gfx);
 		break;
 	case 1:
-		DrawTile1( pos,gfx );
+		DrawTile1(pos, gfx);
 		break;
 	case 2:
-		DrawTile2( pos,gfx );
+		DrawTile2(pos, gfx);
 		break;
 	case 3:
-		DrawTile3( pos,gfx );
+		DrawTile3(pos, gfx);
 		break;
 	case 4:
-		DrawTile4( pos,gfx );
+		DrawTile4(pos, gfx);
 		break;
 	case 5:
-		DrawTile5( pos,gfx );
+		DrawTile5(pos, gfx);
 		break;
 	case 6:
-		DrawTile6( pos,gfx );
+		DrawTile6(pos, gfx);
 		break;
 	case 7:
-		DrawTile7( pos,gfx );
+		DrawTile7(pos, gfx);
 		break;
 	case 8:
-		DrawTile8( pos,gfx );
+		DrawTile8(pos, gfx);
 		break;
 	}
+
+
 }
 
 void SpriteCodex::DrawWin( const Vei2& pos,Graphics& gfx )

@@ -24,6 +24,7 @@
 #include "Mouse.h"
 #include "Graphics.h"
 #include "MineField.h"
+#include "Sound.h"
 
 
 class Game
@@ -44,5 +45,6 @@ private:
 	/********************************/
 	/*  User Variables              */
 	MineField minefield;
+	Sound loseSound;
 	/********************************/
 };

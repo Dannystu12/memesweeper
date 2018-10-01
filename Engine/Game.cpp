@@ -27,7 +27,8 @@ Game::Game(MainWindow & wnd)
 	:
 	wnd(wnd),
 	gfx(wnd),
-	minefield(20)
+	minefield(20),
+	loseSound(L"spayed.wav")
 {
 }
 
@@ -51,7 +52,11 @@ void Game::UpdateModel()
 			const Vei2 mousePos = e.GetPos();
 			if (minefield.GetRect().Contains(mousePos))
 			{
-				minefield.OnRevealClick(mousePos);
+				if (minefield.OnRevealClick(mousePos))
+				{
+					loseSound.Play();
+				}
+				
 			}
 		}
 		else if (e.GetType() == Mouse::Event::Type::RPress)
