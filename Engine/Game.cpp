@@ -28,7 +28,7 @@ Game::Game(MainWindow & wnd)
 	wnd(wnd),
 	gfx(wnd),
 	minefield(20),
-	loseSound(L"spayed.wav")
+	loseSound(L"Sounds/lose.wav")
 {
 }
 
